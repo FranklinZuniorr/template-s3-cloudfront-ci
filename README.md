@@ -14,5 +14,6 @@ CI pipeline for **building and deploying static applications** to an **S3 bucket
 - `AWS_REGION`
 - `S3_BUCKET_NAME`
 - `CLOUDFRONT_DISTRIBUTION_ID`
+- `GITHUB_TOKEN`
 
 Perfect for static site hosting with CDN delivery.
