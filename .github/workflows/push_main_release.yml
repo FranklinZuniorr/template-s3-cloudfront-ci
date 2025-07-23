@@ -16,7 +16,7 @@ on:
         required: true
       CLOUDFRONT_DISTRIBUTION_ID:
         required: true
-      GITHUB_TOKEN:
+      WF_GITHUB_TOKEN:
         required: true
 
 jobs:
@@ -72,5 +72,5 @@ jobs:
 
       - name: Semantic release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
         run: yarn release
