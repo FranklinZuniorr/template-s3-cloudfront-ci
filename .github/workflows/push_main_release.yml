@@ -4,11 +4,24 @@ on:
   push:
     branches:
       - main
-  workflow_call: {}
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      S3_BUCKET_NAME:
+        required: true
+      CLOUDFRONT_DISTRIBUTION_ID:
+        required: true
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   setup:
-    environment: versioning
+    environment: prod
     name: preparing
     runs-on: ubuntu-latest
 
