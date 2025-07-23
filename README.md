@@ -25,7 +25,14 @@ To ensure dynamic routing and seamless integration, configure your frontend proj
     base: process.env.REACT_APP_BROWSER_ROUTER_BASENAME || '/',
     ```
 
------
+### GitHub Actions Workflow Files
+
+To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in the root of your repository. Inside this folder, add the following workflow files:
+
+  * `start_clear_preview.yml`
+  * `start_push_preview.yml`
+  * `start_push_prod_release.yml`
+  * `start_push_stage_release.yml`
 
 ### GitHub Actions Secrets
 
