@@ -53,6 +53,7 @@ jobs:
 
       - name: Build project
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           export REACT_APP_BROWSER_ROUTER_BASENAME="/"
           yarn build
 
