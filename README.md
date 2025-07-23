@@ -1,19 +1,57 @@
 # 🚀 CI Template: Deploy to S3 + CloudFront
 
-CI pipeline for **building and deploying static applications** to an **S3 bucket**, with **automatic CloudFront cache invalidation**.
+This CI pipeline streamlines the **building and deployment of static applications** to an **S3 bucket**, coupled with **automatic CloudFront cache invalidation**.
+
+-----
 
 ## ✅ Features
-- App build process
-- Upload to S3 with `cache-control`
-- Automatic CloudFront invalidation
-- Multi-environment support
 
-## 🔐 Requirements
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_REGION`
-- `S3_BUCKET_NAME`
-- `CLOUDFRONT_DISTRIBUTION_ID`
-- `GITHUB_TOKEN`
+  * **App Build Process**: Automates the build of your static application.
+  * **S3 Upload with Cache-Control**: Efficiently uploads your built application to S3 with optimized cache control settings.
+  * **Automatic CloudFront Invalidation**: Ensures immediate content updates by invalidating CloudFront cache after deployment.
+  * **Multi-environment Support**: Configurable for different deployment environments (e.g., Stage, Production).
 
-Perfect for static site hosting with CDN delivery.
+-----
+
+## ⚙️ How to Use
+
+### Project Configuration
+
+To ensure dynamic routing and seamless integration, configure your frontend project (e.g., with Vite + React) as follows:
+
+  * **React Router DOM**: When using `react-router-dom` with `createBrowserRouter`, set the `basename` using the environment variable `REACT_APP_BROWSER_ROUTER_BASENAME`. This variable will be exposed during the CI build process.
+  * **Vite Configuration**: In your `vite.config.ts`, define the `base` property like this:
+    ```typescript
+    base: process.env.REACT_APP_BROWSER_ROUTER_BASENAME || '/',
+    ```
+
+-----
+
+### GitHub Actions Secrets
+
+For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings:
+
+#### Stage Environment Secrets
+
+These secrets are prefixed with `STAGE_` for your staging environment:
+
+  * `STAGE_AWS_ACCESS_KEY_ID`: Your AWS IAM access key ID.
+  * `STAGE_AWS_SECRET_ACCESS_KEY`: Your AWS IAM secret access key.
+  * `STAGE_AWS_REGION`: The AWS region where your S3 bucket is located.
+  * `STAGE_S3_BUCKET_NAME`: The name of your S3 bucket for the stage environment.
+  * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
+  * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
+  * `STAGE_PROJECT_ENVS`: Environment variables specific to your stage project.
+  * `STAGE_DOMAIN`: The base S3 domain for app review link exposure.
+
+#### Production Environment Secrets
+
+These secrets are for your production environment:
+
+  * `AWS_ACCESS_KEY_ID`: Your AWS IAM access key ID.
+  * `AWS_SECRET_ACCESS_KEY`: Your AWS IAM secret access key.
+  * `AWS_REGION`: The AWS region where your S3 bucket is located.
+  * `S3_BUCKET_NAME`: The name of your S3 bucket for the production environment.
+  * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
+  * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
+  * `PROJECT_ENVS`: Environment variables specific to your production project.
