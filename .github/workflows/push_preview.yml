@@ -49,7 +49,7 @@ jobs:
 
       - name: Build project
         env:
-          REACT_APP_BROWSER_ROUTER_BASENAME: "/${{ env.PREVIEW_PREFIX }}"
+          VITE_BROWSER_ROUTER_BASENAME: "/${{ env.PREVIEW_PREFIX }}"
         run: yarn build
 
       - name: Deploy to S3 preview folder
