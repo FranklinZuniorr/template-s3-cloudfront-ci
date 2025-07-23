@@ -99,7 +99,8 @@ jobs:
               owner,
               repo,
               body: `📊 Coverage report uploaded as an artifact. [Click here to view it](${artifactUrl})
-                  ![Coverage GIF](https://i.giphy.com/XIqCQx02E1U9W.webp)
+
+                ![Coverage GIF](https://i.giphy.com/XIqCQx02E1U9W.webp)
               `
             });
 
@@ -137,7 +138,10 @@ jobs:
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 Preview disponível: [${previewUrl}](${previewUrl})`
+              body: `🚀 Preview disponível: [${previewUrl}](${previewUrl})
+
+                ![Coverage GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZThtYmVtZThra2loajhjbmIzM2ZnNHAxZHQ4aHowcHkzZnV2Nzl5OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ukZvSoWXXb3YKNHIsw/giphy.gif)
+              `
             });
         env:
           DOMAIN: ${{ secrets.DOMAIN }}
