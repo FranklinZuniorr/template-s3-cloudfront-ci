@@ -18,7 +18,6 @@ on:
 
 jobs:
   setup:
-    environment: prod
     name: preparing
     runs-on: ubuntu-latest
 

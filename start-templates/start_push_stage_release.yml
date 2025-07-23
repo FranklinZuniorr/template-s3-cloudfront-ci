@@ -1,0 +1,18 @@
+name: Deploy to S3 and CloudFront
+
+on:
+  push:
+    branches:
+      - stage
+  workflow_call: {}
+
+jobs:
+  deploy:
+    uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGE_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.STAGE_AWS_REGION }}
+      S3_BUCKET_NAME: ${{ secrets.STAGE_S3_BUCKET_NAME }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGE_CLOUDFRONT_DISTRIBUTION_ID }}
+      WF_GITHUB_TOKEN: ${{ secrets.STAGE_WF_GITHUB_TOKEN }}
