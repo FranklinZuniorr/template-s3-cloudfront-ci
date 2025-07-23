@@ -98,7 +98,13 @@ jobs:
               issue_number: prNumber,
               owner,
               repo,
-              body: `📊 Coverage report uploaded as an artifact. [Click here to view it](${artifactUrl})`
+              body: `📊 Coverage report uploaded as an artifact. [Click here to view it](${artifactUrl})
+                  \`\`\`
+                  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+                  ░░░░░░░░░░▀█▄▀▄▀██████░▀█▄▀▄▀████▀
+                  ░░░░░░░░░░░░▀█▄█▄███▀░░░▀██▄█▄█▀
+                  \`\`\`
+              `
             });
 
       - name: Create .env file
