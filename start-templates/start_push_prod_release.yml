@@ -16,3 +16,4 @@ jobs:
       S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
       WF_GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
+      PROJECT_ENVS: ${{ secrets.PROJECT_ENVS }}

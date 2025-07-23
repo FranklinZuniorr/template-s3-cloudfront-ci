@@ -17,6 +17,8 @@ on:
         required: true
       WF_GITHUB_TOKEN:
         required: true
+      PROJECT_ENVS:
+        required: true
 
 jobs:
   preview:
@@ -46,6 +48,10 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Create .env file
+        run: |
+          printf "%s" "${{ secrets.PROJECT_ENVS }}" > .env
 
       - name: Build project
         run: |
