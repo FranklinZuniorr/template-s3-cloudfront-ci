@@ -51,6 +51,8 @@ jobs:
 
       - name: Commit message lint
         uses: wagoid/commitlint-github-action@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
 
       - name: Typescript check
         run: yarn tsc --build
