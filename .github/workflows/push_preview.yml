@@ -77,7 +77,7 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const domain = process.env.DOMAIN;
             const prefix = `preview-pr-${prNumber}`;
-            const previewUrl = `https://${domain}/${prefix}/`;
+            const previewUrl = `https://${domain}/${prefix}/index.html`;
 
             github.rest.issues.createComment({
               issue_number: prNumber,
