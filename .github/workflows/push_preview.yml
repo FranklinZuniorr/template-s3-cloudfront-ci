@@ -76,11 +76,30 @@ jobs:
         if: inputs.run_tests == true
         run: yarn test:ci
 
-      - name: Code Coverage Summary Report
+      - name: Upload coverage report
         if: inputs.run_tests == true
-        uses: irongut/CodeCoverageSummary@v1.3.0
+        uses: actions/upload-artifact@v4
         with:
+          name: coverage-report
           path: coverage
+
+      - name: Comment coverage report link
+        if: github.event_name == 'pull_request' && inputs.run_tests == true
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.WF_GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const runId = context.runId;
+            const { owner, repo } = context.repo;
+            const artifactUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner,
+              repo,
+              body: `📊 Coverage report uploaded as an artifact. [Click here to view it](${artifactUrl})`
+            });
 
       - name: Create .env file
         run: |
