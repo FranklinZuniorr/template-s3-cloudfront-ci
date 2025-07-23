@@ -49,6 +49,21 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Commit message lint
+        uses: wagoid/commitlint-github-action@v6
+
+      - name: Typescript check
+        run: yarn tsc --build
+
+      - name: Test coverage
+        run: yarn test:ci
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
       - name: Create .env file
         run: |
           printf "%s" "${{ secrets.PROJECT_ENVS }}" > .env
