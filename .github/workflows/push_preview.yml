@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PREVIEW_PREFIX: preview/pr-${{ github.event.pull_request.number }}
+      PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
 
     steps:
       - name: Checkout code
@@ -76,7 +76,7 @@ jobs:
           script: |
             const prNumber = context.payload.pull_request.number;
             const domain = process.env.DOMAIN;
-            const prefix = `preview/pr-${prNumber}`;
+            const prefix = `preview-pr-${prNumber}`;
             const previewUrl = `https://${domain}/${prefix}/`;
 
             github.rest.issues.createComment({
