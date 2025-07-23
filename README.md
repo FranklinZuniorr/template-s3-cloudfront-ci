@@ -62,3 +62,9 @@ These secrets are for your production environment:
   * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
   * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
   * `PROJECT_ENVS`: Environment variables specific to your production project.
+
+### PUSH PREVIEW CI INPUTS
+
+- `run_tests`: Enables or disables running the test suite and uploading the coverage report.  
+- `run_lint`: Enables or disables the commit message linting step.  
+- `run_tsc`: Enables or disables the TypeScript build and type checking step.
