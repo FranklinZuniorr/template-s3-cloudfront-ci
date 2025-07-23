@@ -28,6 +28,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.WF_GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -78,5 +79,4 @@ jobs:
       - name: Semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
         run: yarn release
