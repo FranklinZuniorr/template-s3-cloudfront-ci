@@ -1,0 +1,55 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      S3_BUCKET_NAME:
+        required: true
+      DOMAIN:
+        required: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    env:
+      PREVIEW_PREFIX: preview/pr-${{ github.event.pull_request.number }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Deploy to S3 preview folder
+        run: |
+          aws s3 sync ./build s3://$S3_BUCKET_NAME/$PREVIEW_PREFIX --delete
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+      - name: Output Preview URL
+        run: |
+          echo "🔗 Preview: https://${DOMAIN}/${PREVIEW_PREFIX}/"
+        env:
+          DOMAIN: ${{ secrets.DOMAIN }}
