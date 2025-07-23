@@ -13,6 +13,8 @@ on:
         required: true
       DOMAIN:
         required: true
+      CLOUDFRONT_DISTRIBUTION_ID:
+        required: true
 
 jobs:
   preview:
@@ -55,8 +57,30 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
-      - name: Output Preview URL
+      - name: Invalidate CloudFront cache
         run: |
-          echo "🔗 Preview: https://${DOMAIN}/${PREVIEW_PREFIX}/"
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
+      - name: Output Preview URL
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const domain = process.env.DOMAIN;
+            const prefix = `preview/pr-${prNumber}`;
+            const previewUrl = `https://${domain}/${prefix}/`;
+      
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview disponível: [${previewUrl}](${previewUrl})`
+            });
         env:
           DOMAIN: ${{ secrets.DOMAIN }}
