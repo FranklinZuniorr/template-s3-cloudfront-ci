@@ -15,6 +15,8 @@ on:
         required: true
       CLOUDFRONT_DISTRIBUTION_ID:
         required: true
+      WF_GITHUB_TOKEN:
+        required: true
 
 jobs:
   preview:
@@ -70,12 +72,13 @@ jobs:
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
+          github-token: ${{ secrets.WF_GITHUB_TOKEN }}
           script: |
             const prNumber = context.payload.pull_request.number;
             const domain = process.env.DOMAIN;
             const prefix = `preview/pr-${prNumber}`;
             const previewUrl = `https://${domain}/${prefix}/`;
-      
+
             github.rest.issues.createComment({
               issue_number: prNumber,
               owner: context.repo.owner,
