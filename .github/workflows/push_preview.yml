@@ -24,10 +24,6 @@ jobs:
   preview:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      pull-requests: write
-
     env:
       PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
 
@@ -55,6 +51,8 @@ jobs:
 
       - name: Commit message lint
         uses: wagoid/commitlint-github-action@v6
+        with:
+          token: ${{ secrets.WF_GITHUB_TOKEN }}
 
       - name: Typescript check
         run: yarn tsc --build
