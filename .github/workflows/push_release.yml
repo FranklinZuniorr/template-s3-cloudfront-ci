@@ -87,6 +87,27 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
+      - name: Preview CloudFront Domain
+        if: steps.get_cf_domain.outputs.domain_name != ''
+        uses: actions/github-script@v6
+        env:
+          DOMAIN_NAME: ${{ steps.get_cf_domain.outputs.domain_name }}
+        with:
+          github-token: ${{ secrets.WF_GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const { owner, repo } = context.repo;
+            const domainName = process.env.DOMAIN_NAME;
+      
+            const url = `https://${domainName}`;
+      
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner,
+              repo,
+              body: `🌐 Preview: [${url}](${url})`
+            });
+        
       - name: Semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
