@@ -8,7 +8,6 @@ on:
 
 jobs:
   deploy:
-    environment: stage
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}

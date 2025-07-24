@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-    environment: stage
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_preview.yml@main
     with:
       run_tests: false
