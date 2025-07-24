@@ -59,7 +59,7 @@ jobs:
       
           echo "📥 Downloading .env from GitHub API: $LINK"
       
-          CONTENT=$(curl -sSL \
+          CONTENT=$(curl
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/vnd.github.v3.raw" \
             "$LINK")
