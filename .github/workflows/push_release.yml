@@ -63,7 +63,7 @@ jobs:
             curl -sSL \
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/vnd.github.v3.raw" \
-            https://raw.githubusercontent.com/FranklinZuniorr/qd-plan-secrets/refs/heads/main/.env.prod
+            "https://raw.githubusercontent.com/FranklinZuniorr/qd-plan-secrets/refs/heads/main/.env.prod"
           )
       
           if [ -z "$CONTENT" ]; then
