@@ -48,13 +48,13 @@ These secrets are prefixed with `STAGE_` for your staging environment:
   * `STAGE_S3_BUCKET_NAME`: The name of your S3 bucket for the stage environment.
   * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
   * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
-  * `STAGE_GH_LINK_PROJECT_ENVS`: Private GitHub repository link of environment variables specific to your stage project. 
 
-    ⚠️ **This must be the raw URL** of the `.env.stage` file in a private GitHub repository, allowing direct download of environment variables content, not a web interface link.
+  > 📜 AWS SSM Parameter - Project envs
 
-  * `STAGE_GH_LINK_PR_PROJECT_ENVS`: Private GitHub repository link of custom open pull-request environment variables specific to your stage. `OPTIONAL`
+  * `AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables specific to your project in stage environment.
+  * `STAGE_AWS_PR_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains custom environment variables for open pull requests in the stage environment.
 
-    ⚠️ **This must be the raw URL** of the `.env.stage.pr` file for the pull request environment in a private GitHub repository, enabling direct access to the raw environment variables.
+  > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
 #### Production Secrets
 
@@ -66,9 +66,12 @@ These secrets are for your production environment:
   * `S3_BUCKET_NAME`: The name of your S3 bucket for the production environment.
   * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
   * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
-  * `GH_LINK_PROJECT_ENVS`: Private GitHub repository link of environment variables specific to your default project environment (e.g., production or development).  
 
-    ⚠️ **This must be the raw URL** of the `.env.prod` file stored in a private GitHub repository to ensure the pipeline can fetch the raw environment variables content directly.
+  > 📜 AWS SSM Parameter - Project envs
+
+  * `AWS_SSM_PARAMETER_PATHs`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables for your project in production environment.
+
+  > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
 ### PUSH PREVIEW CI INPUTS
 
