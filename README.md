@@ -68,7 +68,8 @@ These secrets are for your production environment:
   * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
   * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
   * `GH_LINK_PROJECT_ENVS`: Private GitHub repository link of environment variables specific to your default project environment (e.g., production or development).  
-  ⚠️ **This must be the raw URL** of the `.env` file stored in a private GitHub repository to ensure the pipeline can fetch the raw environment variables content directly.
+
+    ⚠️ **This must be the raw URL** of the `.env` file stored in a private GitHub repository to ensure the pipeline can fetch the raw environment variables content directly.
 
 ### PUSH PREVIEW CI INPUTS
 
