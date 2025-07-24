@@ -107,8 +107,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
+          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
         run: |
-          PARAM_PATH="${AWS_PREVIEW_PARAM_NAME}"
+          PARAM_PATH="${AWS_SSM_PARAMETER_PATH}"
 
           if [ -z "$PARAM_PATH" ]; then
             echo "❌ None parameter path provided."
