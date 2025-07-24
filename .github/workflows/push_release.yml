@@ -97,14 +97,20 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
-      - name: Get CloudFront Domain Name
+      - name: Get CloudFront Domain Name and Alternate Name
         id: get_cf_domain
         run: |
           DOMAIN_NAME=$(aws cloudfront get-distribution --id $CLOUDFRONT_DISTRIBUTION_ID \
             --query 'Distribution.DomainName' --output text)
-          
+      
+          ALTERNATE_NAME=$(aws cloudfront get-distribution --id $CLOUDFRONT_DISTRIBUTION_ID \
+            --query 'Distribution.DistributionConfig.Aliases.Items[0]' --output text)
+      
           echo "Domain name is: $DOMAIN_NAME"
+          echo "Alternate domain (CNAME) is: $ALTERNATE_NAME"
+      
           echo "domain_name=$DOMAIN_NAME" >> "$GITHUB_OUTPUT"
+          echo "alternate_name=$ALTERNATE_NAME" >> "$GITHUB_OUTPUT"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -112,11 +118,24 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Preview URL summary
-        if: steps.get_cf_domain.outputs.domain_name != ''
+        if: ${{ steps.get_cf_domain.outputs.alternate_name != 'None' || steps.get_cf_domain.outputs.domain_name != '' }}
         run: |
-          echo "### 🌐 Preview disponível" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 https://${{ steps.get_cf_domain.outputs.domain_name }}" >> $GITHUB_STEP_SUMMARY
+          DOMAIN_NAME="${DOMAIN_NAME}"
+          ALTERNATE_DOMAIN="${ALTERNATE_DOMAIN}"
+          PREFIX="preview-pr-${{ github.event.pull_request.number }}"
+      
+          if [[ -n "$ALTERNATE_DOMAIN" && "$ALTERNATE_DOMAIN" != "None" ]]; then
+            PREVIEW_URL="https://${ALTERNATE_DOMAIN}/${PREFIX}"
+          else
+            PREVIEW_URL="https://${DOMAIN_NAME}/${PREFIX}"
+          fi
+      
+          echo "### 🌐 Preview disponível" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "🔗 $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          DOMAIN_NAME: ${{ steps.get_cf_domain.outputs.domain_name }}
+          ALTERNATE_DOMAIN: ${{ steps.get_cf_domain.outputs.alternate_name }}
         
       - name: Semantic release
         env:
