@@ -28,9 +28,9 @@ on:
         required: true
       WF_GITHUB_TOKEN:
         required: true
-      GH_LINK_PROJECT_ENVS:
+      AWS_SSM_PARAMETER_PATH:
         required: true
-      GH_LINK_PR_PROJECT_ENVS:
+      AWS_PR_SSM_PARAMETER_PATH:
         required: false
 
 jobs:
@@ -105,31 +105,28 @@ jobs:
       - name: Create .env file from GitHub API
         env:
           GH_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
-          GH_LINK_PR_PROJECT_ENVS: ${{ secrets.GH_LINK_PR_PROJECT_ENVS }}
-          GH_LINK_PROJECT_ENVS: ${{ secrets.GH_LINK_PROJECT_ENVS }}
+          AWS_PR_SSM_PARAMETER_PATH: ${{ secrets.AWS_PR_SSM_PARAMETER_PATH }}
+          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
         run: |
-          LINK="${GH_LINK_PR_PROJECT_ENVS:-$GH_LINK_PROJECT_ENVS}"
-      
-          if [ -z "$LINK" ]; then
-            echo "❌ None link provided."
+          PARAM_PATH="${AWS_PR_SSM_PARAMETER_PATH:-$AWS_SSM_PARAMETER_PATH}"
+
+          if [ -z "$PARAM_PATH" ]; then
+            echo "❌ None parameter path provided."
             exit 1
           fi
-      
-          echo "📥 Downloading .env from GitHub API: $LINK"
-      
-          CONTENT=$(curl -sSL \
-            -H "Authorization: token $GH_TOKEN" \
-            -H "Accept: application/vnd.github.v3.raw" \
-            "$LINK")
-      
+
+          echo "📥 Downloading .env content from AWS SSM Parameter Store: $PARAM_PATH"
+
+          CONTENT=$(aws ssm get-parameter --name "$PARAM_PATH" --with-decryption --query Parameter.Value --output text)
+
           if [ -z "$CONTENT" ]; then
             echo "❌ Failed to download content or content is empty."
             exit 1
           fi
-      
+
           printf "%s" "$CONTENT" > .env
-      
-          echo "✅ File .env created:"
+
+          echo "✅ File .env created from SSM Parameter Store"
           
       - name: Build project
         run: |
