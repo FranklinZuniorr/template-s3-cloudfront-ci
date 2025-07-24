@@ -45,7 +45,7 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Create .env file from GitHub raw file link
+      - name: Create .env file from GitHub API
         env:
           GH_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
           GH_LINK_PROJECT_ENVS: ${{ secrets.GH_LINK_PROJECT_ENVS }}
@@ -57,24 +57,22 @@ jobs:
             exit 1
           fi
       
-          if [[ "$LINK" == *"?"* ]]; then
-            AUTH_LINK="${LINK}&token=${GH_TOKEN}"
-          else
-            AUTH_LINK="${LINK}?token=${GH_TOKEN}"
-          fi
+          echo "📥 Downloading .env from GitHub API: $LINK"
       
-          echo "📥 Downloading .env from: $AUTH_LINK"
-      
-          CONTENT=$(curl -sSL "$AUTH_LINK")
+          CONTENT=$(curl -sSL \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            "$LINK")
       
           if [ -z "$CONTENT" ]; then
             echo "❌ Failed to download content or content is empty."
             exit 1
           fi
-
+      
           printf "%s" "$CONTENT" > .env
       
           echo "✅ File .env created:"
+          cat .env      
 
       - name: Build project
         run: |
