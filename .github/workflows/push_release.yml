@@ -72,7 +72,6 @@ jobs:
           printf "%s" "$CONTENT" > .env
       
           echo "✅ File .env created:"
-          cat .env      
 
       - name: Build project
         run: |
