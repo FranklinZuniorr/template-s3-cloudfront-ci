@@ -49,9 +49,12 @@ These secrets are prefixed with `STAGE_` for your staging environment:
   * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
   * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
   * `STAGE_DOMAIN`: The base S3 domain for app review link exposure.
-  * `STAGE_GH_LINK_PROJECT_ENVS`: Private GitHub repository link of environment variables specific to your stage project.  
-  ⚠️ **This must be the raw URL** of the `.env` file in a private GitHub repository, allowing direct download of environment variables content, not a web interface link.
-  * `STAGE_GH_LINK_PR_PROJECT_ENVS`: Private GitHub repository link of custom open pull-request environment variables specific to your stage.  
+  * `STAGE_GH_LINK_PROJECT_ENVS`: Private GitHub repository link of environment variables specific to your stage project. 
+
+    ⚠️ **This must be the raw URL** of the `.env` file in a private GitHub repository, allowing direct download of environment variables content, not a web interface link.
+
+  * `STAGE_GH_LINK_PR_PROJECT_ENVS`: Private GitHub repository link of custom open pull-request environment variables specific to your stage. `OPTIONAL`
+
     ⚠️ **This must be the raw URL** of the `.env` file for the pull request environment in a private GitHub repository, enabling direct access to the raw environment variables.
 
 #### Production Secrets
