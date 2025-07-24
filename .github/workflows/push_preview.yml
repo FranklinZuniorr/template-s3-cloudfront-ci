@@ -37,7 +37,7 @@ jobs:
 
     env:
       PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
-      AWS_PR_SSM_PARAMETER: .env.stage.pr.${{ secrets.PREVIEW_PREFIX }}
+      AWS_PR_SSM_PARAMETER: .env.stage.pr.${{ github.event.pull_request.number }}
 
     steps:
       - name: Checkout code
