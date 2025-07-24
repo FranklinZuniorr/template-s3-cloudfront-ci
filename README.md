@@ -25,7 +25,35 @@ To ensure dynamic routing and seamless integration, configure your frontend proj
     base: process.env.REACT_APP_BROWSER_ROUTER_BASENAME || '/',
     ```
 
-### GitHub Actions Workflow Files
+### 📌 Why set the basename?
+
+When deploying a Single Page Application (SPA) using Static Site Generation (SSG) — such as with **Vite** — to environments like Amazon S3, you often serve your site under a **subpath** (e.g., `https://example.com/my-app/`) instead of the root (`/`).
+
+By setting the `basename` in your **router** and the `base` in your **Vite config**, you ensure:
+
+#### ✅ Correct routing
+React Router knows that all routes should be resolved relative to the subpath.
+
+#### ✅ Correct asset loading
+JS, CSS, and other static assets will be linked using the correct base path (e.g., `/my-app/assets/...`) in the generated `index.html`.
+
+#### ⚠️ Without this configuration
+The app may break when accessed from a subdirectory:
+
+- Routes may return **404**
+- Static assets may **fail to load**
+
+#### 💡 Note for other types of projects
+
+Even if you're not using **React** or **Vite** — for example, a project with plain HTML, Angular, or another bundler — a similar configuration is essential:
+
+- In **pure HTML** projects, set a `<base href="/my-app/">` tag inside the `<head>` to ensure all relative paths for links, scripts, and stylesheets resolve correctly.
+- In **Angular**, configure the `baseHref` in `angular.json` or via the CLI build flag `--base-href`.
+
+#### 🔁 Always match the deployed subpath
+Avoid broken links and routing issues by ensuring the subpath used in your configuration matches the one used during deployment — **regardless of the framework or setup** you're using.
+
+## GitHub Actions Workflow Files
 
 To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in the root of your repository. Inside this folder, add the following workflow files:
 
@@ -34,7 +62,7 @@ To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in
   * `start_push_prod_release.yml`
   * `start_push_stage_release.yml`
 
-### GitHub Actions Secrets
+## GitHub Actions Secrets
 
 For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings:
 
@@ -73,7 +101,7 @@ These secrets are for your production environment:
 
   > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
-### PUSH PREVIEW CI INPUTS
+## PUSH PREVIEW CI INPUTS
 
 - `run_tests`: Enables or disables running the test suite and uploading the coverage report.  
 - `run_lint`: Enables or disables the commit message linting step.  
