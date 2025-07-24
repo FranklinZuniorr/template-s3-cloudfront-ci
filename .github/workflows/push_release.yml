@@ -122,12 +122,11 @@ jobs:
         run: |
           DOMAIN_NAME="${DOMAIN_NAME}"
           ALTERNATE_DOMAIN="${ALTERNATE_DOMAIN}"
-          PREFIX="preview-pr-${{ github.event.pull_request.number }}"
       
           if [[ -n "$ALTERNATE_DOMAIN" && "$ALTERNATE_DOMAIN" != "None" ]]; then
-            PREVIEW_URL="https://${ALTERNATE_DOMAIN}/${PREFIX}"
+            PREVIEW_URL="https://${ALTERNATE_DOMAIN}"
           else
-            PREVIEW_URL="https://${DOMAIN_NAME}/${PREFIX}"
+            PREVIEW_URL="https://${DOMAIN_NAME}"
           fi
       
           echo "### 🌐 Preview disponível" >> "$GITHUB_STEP_SUMMARY"
