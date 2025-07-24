@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    environment: stage
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_preview.yml@main
     with:
       run_tests: false
@@ -20,4 +21,5 @@ jobs:
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGE_CLOUDFRONT_DISTRIBUTION_ID }}
       WF_GITHUB_TOKEN: ${{ secrets.STAGE_WF_GITHUB_TOKEN }}
       DOMAIN: ${{ secrets.STAGE_DOMAIN }}
-      PROJECT_ENVS: ${{ secrets.STAGE_PROJECT_ENVS }}
+      PROJECT_ENVS: ${{ secrets.PROJECT_ENVS }}
+      PR_PROJECT_ENVS: ${{ secrets.PR_PROJECT_ENVS }}

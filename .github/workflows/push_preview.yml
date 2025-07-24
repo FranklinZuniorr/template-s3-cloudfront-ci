@@ -32,6 +32,8 @@ on:
         required: true
       PROJECT_ENVS:
         required: true
+      PR_PROJECT_ENVS:
+        required: false
 
 jobs:
   preview:
@@ -104,8 +106,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          printf "%s" "${{ secrets.PROJECT_ENVS }}" > .env
-
+          printf "%s" "${{ secrets.PR_PROJECT_ENVS || secrets.PROJECT_ENVS }}" > .env
+        
       - name: Build project
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096"

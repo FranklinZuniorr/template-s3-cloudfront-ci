@@ -8,6 +8,7 @@ on:
 
 jobs:
   deploy:
+    environment: stage
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
@@ -16,4 +17,4 @@ jobs:
       S3_BUCKET_NAME: ${{ secrets.STAGE_S3_BUCKET_NAME }}
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGE_CLOUDFRONT_DISTRIBUTION_ID }}
       WF_GITHUB_TOKEN: ${{ secrets.STAGE_WF_GITHUB_TOKEN }}
-      PROJECT_ENVS: ${{ secrets.STAGE_PROJECT_ENVS }}
+      PROJECT_ENVS: ${{ secrets.PROJECT_ENVS }}

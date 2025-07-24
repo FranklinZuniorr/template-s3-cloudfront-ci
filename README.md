@@ -38,7 +38,7 @@ To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in
 
 For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings:
 
-#### Stage Environment Secrets
+#### Stage Secrets
 
 These secrets are prefixed with `STAGE_` for your staging environment:
 
@@ -48,10 +48,9 @@ These secrets are prefixed with `STAGE_` for your staging environment:
   * `STAGE_S3_BUCKET_NAME`: The name of your S3 bucket for the stage environment.
   * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
   * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
-  * `STAGE_PROJECT_ENVS`: Environment variables specific to your stage project.
   * `STAGE_DOMAIN`: The base S3 domain for app review link exposure.
 
-#### Production Environment Secrets
+#### Production Secrets
 
 These secrets are for your production environment:
 
@@ -61,7 +60,17 @@ These secrets are for your production environment:
   * `S3_BUCKET_NAME`: The name of your S3 bucket for the production environment.
   * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
   * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
-  * `PROJECT_ENVS`: Environment variables specific to your production project.
+
+### GitHub environments: stage, production
+
+#### stage
+
+* `PROJECT_ENVS`: Environment variables specific to your stage project.
+* `PR_PROJECT_ENVS`: Environment variables specific to your project when has some pull-request opened.
+
+#### production
+
+* `PROJECT_ENVS`: Environment variables specific to your production project.
 
 ### PUSH PREVIEW CI INPUTS
 
