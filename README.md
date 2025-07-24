@@ -69,7 +69,7 @@ These secrets are for your production environment:
 
   > 📜 AWS SSM Parameter - Project envs
 
-  * `AWS_SSM_PARAMETER_PATHs`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables for your project in production environment.
+  * `AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables for your project in production environment.
 
   > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
