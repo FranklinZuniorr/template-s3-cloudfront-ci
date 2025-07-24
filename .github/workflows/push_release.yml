@@ -15,7 +15,7 @@ on:
         required: true
       WF_GITHUB_TOKEN:
         required: true
-      PROJECT_ENVS:
+      GH_LINK_PROJECT_ENVS:
         required: true
 
 jobs:
@@ -45,9 +45,25 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Create .env file
+      - name: Create .env file from GitHub link
+        env:
+          GH_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
+          GH_LINK_PROJECT_ENVS: ${{ secrets.GH_LINK_PROJECT_ENVS }}
         run: |
-          printf "%s" "${{ secrets.PROJECT_ENVS }}" > .env
+          LINK="${GH_LINK_PROJECT_ENVS}"
+      
+          if [ -z "$LINK" ]; then
+            echo "❌ None link provided."
+            exit 1
+          fi
+      
+          echo "📥 $LINK"
+      
+          curl -H "Authorization: token $GH_TOKEN" \
+                -H "Accept: application/vnd.github.v3.raw" \
+                "$LINK" > .env
+      
+          echo "✅ File .env created:"
 
       - name: Build project
         run: |

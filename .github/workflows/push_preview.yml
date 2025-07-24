@@ -30,9 +30,9 @@ on:
         required: true
       WF_GITHUB_TOKEN:
         required: true
-      PROJECT_ENVS:
+      GH_LINK_PROJECT_ENVS:
         required: true
-      PR_PROJECT_ENVS:
+      GH_LINK_PR_PROJECT_ENVS:
         required: false
 
 jobs:
@@ -104,9 +104,26 @@ jobs:
               ![Coverage GIF](https://i.giphy.com/XIqCQx02E1U9W.webp)`
             });
 
-      - name: Create .env file
+      - name: Create .env file from GitHub link
+        env:
+          GH_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
+          GH_LINK_PR_PROJECT_ENVS: ${{ secrets.GH_LINK_PR_PROJECT_ENVS }}
+          GH_LINK_PROJECT_ENVS: ${{ secrets.GH_LINK_PROJECT_ENVS }}
         run: |
-          printf "%s" "${{ secrets.PR_PROJECT_ENVS || secrets.PROJECT_ENVS }}" > .env
+          LINK="${GH_LINK_PR_PROJECT_ENVS:-$GH_LINK_PROJECT_ENVS}"
+      
+          if [ -z "$LINK" ]; then
+            echo "❌ None link provided."
+            exit 1
+          fi
+      
+          echo "📥 $LINK"
+      
+          curl -H "Authorization: token $GH_TOKEN" \
+                -H "Accept: application/vnd.github.v3.raw" \
+                "$LINK" > .env
+      
+          echo "✅ File .env created:"
         
       - name: Build project
         run: |
