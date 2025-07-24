@@ -123,12 +123,12 @@ jobs:
             exit 1
           fi
 
-          if aws ssm get-parameter --name "$PARAM_NAME" &> /dev/null; then
-            echo "❌ Parameter $PARAM_NAME already exist"
+          if aws ssm get-parameter --name "$AWS_PREVIEW_PARAM_NAME" &> /dev/null; then
+            echo "❌ Parameter $AWS_PREVIEW_PARAM_NAME already exist"
           else
-            echo "Creating new parameter $PARAM_NAME"
+            echo "Creating new parameter $AWS_PREVIEW_PARAM_NAME"
             aws ssm put-parameter \
-              --name "$PARAM_NAME" \
+              --name "$AWS_PREVIEW_PARAM_NAME" \
               --value "$CONTENT" \
               --type String \
               --tier Standard \
