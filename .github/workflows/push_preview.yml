@@ -30,8 +30,6 @@ on:
         required: true
       AWS_SSM_PARAMETER_PATH:
         required: true
-      AWS_PR_SSM_PARAMETER_PATH:
-        required: false
 
 jobs:
   preview:
@@ -39,6 +37,7 @@ jobs:
 
     env:
       PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
+      AWS_PR_SSM_PARAMETER: .env.stage.pr.${{ secrets.PREVIEW_PREFIX }}
 
     steps:
       - name: Checkout code
@@ -102,15 +101,47 @@ jobs:
               ![Coverage GIF](https://i.giphy.com/XIqCQx02E1U9W.webp)`
             });
 
+      - name: AWS SSM new parameter - Project envs
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
+        run: |
+          PARAM_PATH="${AWS_SSM_PARAMETER_PATH}"
+
+          if [ -z "$PARAM_PATH" ]; then
+            echo "❌ None parameter path provided."
+            exit 1
+          fi
+
+          CONTENT=$(aws ssm get-parameter --name "$PARAM_PATH" --with-decryption --query Parameter.Value --output text)
+
+          if [ -z "$CONTENT" ]; then
+            echo "❌ Failed to download content or content is empty."
+            exit 1
+          fi
+
+          if aws ssm get-parameter --name "$PARAM_NAME" &> /dev/null; then
+            echo "❌ Parameter $PARAM_NAME already exist"
+          else
+            echo "Creating new parameter $PARAM_NAME"
+            aws ssm put-parameter \
+              --name "$PARAM_NAME" \
+              --value "$CONTENT" \
+              --type String \
+              --tier Standard \
+              --overwrite
+          fi
+
       - name: Create .env file from GitHub API
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_PR_SSM_PARAMETER_PATH: ${{ secrets.AWS_PR_SSM_PARAMETER_PATH }}
-          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
+          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
         run: |
-          PARAM_PATH="${AWS_PR_SSM_PARAMETER_PATH:-$AWS_SSM_PARAMETER_PATH}"
+          PARAM_PATH="${AWS_PREVIEW_PARAM_NAME}"
 
           if [ -z "$PARAM_PATH" ]; then
             echo "❌ None parameter path provided."
