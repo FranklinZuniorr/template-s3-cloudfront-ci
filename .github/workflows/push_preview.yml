@@ -155,14 +155,20 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
-      - name: Get CloudFront Domain Name
+      - name: Get CloudFront Domain Name and Alternate Name
         id: get_cf_domain
         run: |
           DOMAIN_NAME=$(aws cloudfront get-distribution --id $CLOUDFRONT_DISTRIBUTION_ID \
             --query 'Distribution.DomainName' --output text)
-          
+      
+          ALTERNATE_NAME=$(aws cloudfront get-distribution --id $CLOUDFRONT_DISTRIBUTION_ID \
+            --query 'Distribution.DistributionConfig.Aliases.Items[0]' --output text)
+      
           echo "Domain name is: $DOMAIN_NAME"
+          echo "Alternate domain (CNAME) is: $ALTERNATE_NAME"
+      
           echo "domain_name=$DOMAIN_NAME" >> "$GITHUB_OUTPUT"
+          echo "alternate_name=$ALTERNATE_NAME" >> "$GITHUB_OUTPUT"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -176,16 +182,23 @@ jobs:
           github-token: ${{ secrets.WF_GITHUB_TOKEN }}
           script: |
             const prNumber = context.payload.pull_request.number;
-            const domain = process.env.DOMAIN;
             const prefix = `preview-pr-${prNumber}`;
-            const previewUrl = `https://${domain}/${prefix}`;
 
-            github.rest.issues.createComment({
+            const domain_name = process.env.DOMAIN_NAME;
+            const alternate_domain = process.env.ALTERNATE_DOMAIN;
+
+            const previewDomainNameUrl = `https://${domain_name}/${prefix}`;
+            const previewAlternateDomain = `https://${alternate_domain}/${prefix}`;
+
+            const previewUrl = alternate_domain ? previewAlternateDomain : previewDomainNameUrl;
+
+            await github.rest.issues.createComment({
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `🚀 Preview disponível: [${previewUrl}](${previewUrl})\n
-              ![Coverage GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZThtYmVtZThra2loajhjbmIzM2ZnNHAxZHQ4aHowcHkzZnV2Nzl5OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ukZvSoWXXb3YKNHIsw/giphy.gif)`
+            ![Coverage GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZThtYmVtZThra2loajhjbmIzM2ZnNHAxZHQ4aHowcHkzZnV2Nzl5OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ukZvSoWXXb3YKNHIsw/giphy.gif)`
             });
         env:
-          DOMAIN: ${{ steps.get_cf_domain.outputs.domain_name }}
+          DOMAIN_NAME: ${{ steps.get_cf_domain.outputs.domain_name }}
+          ALTERNATE_DOMAIN: ${{ steps.get_cf_domain.outputs.alternate_name }}
