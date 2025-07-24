@@ -140,7 +140,7 @@ jobs:
       - name: Detect changed files
         id: detect_changes
         run: |
-          CHANGED_FILES=$(aws s3 sync ./build s3://$S3_BUCKET_NAME --exact-timestamps --dryrun \
+          CHANGED_FILES=$(aws s3 sync ./build s3://$S3_BUCKET_NAME --size-only --dryrun \
             | grep 'upload:' \
             | awk '{sub(/^\.\/build/, "", $3); print $3}' \
             | sed 's/^/\//' \
