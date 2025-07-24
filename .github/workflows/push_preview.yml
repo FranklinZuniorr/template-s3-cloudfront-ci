@@ -24,8 +24,6 @@ on:
         required: true
       S3_BUCKET_NAME:
         required: true
-      DOMAIN:
-        required: true
       CLOUDFRONT_DISTRIBUTION_ID:
         required: true
       WF_GITHUB_TOKEN:
@@ -148,6 +146,29 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
+      - name: Get CloudFront Domain Name
+        id: get_cf_domain
+        run: |
+          DOMAIN_NAME=$(aws cloudfront get-distribution --id $CLOUDFRONT_DISTRIBUTION_ID \
+            --query 'Distribution.DomainName' --output text)
+          
+          echo "Domain name is: $DOMAIN_NAME"
+          echo "domain_name=$DOMAIN_NAME" >> "$GITHUB_OUTPUT"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
       - name: Output Preview URL
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
@@ -157,7 +178,7 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const domain = process.env.DOMAIN;
             const prefix = `preview-pr-${prNumber}`;
-            const previewUrl = `https://${domain}/${prefix}/index.html`;
+            const previewUrl = `https://${domain}/${prefix}`;
 
             github.rest.issues.createComment({
               issue_number: prNumber,
@@ -167,4 +188,4 @@ jobs:
               ![Coverage GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZThtYmVtZThra2loajhjbmIzM2ZnNHAxZHQ4aHowcHkzZnV2Nzl5OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ukZvSoWXXb3YKNHIsw/giphy.gif)`
             });
         env:
-          DOMAIN: ${{ secrets.DOMAIN }}
+          DOMAIN: ${{ steps.get_cf_domain.outputs.domain_name }}
