@@ -56,8 +56,6 @@ jobs:
             echo "❌ None link provided."
             exit 1
           fi
-
-          echo "$LINK"
       
           echo "📥 Downloading .env from GitHub API: $LINK"
       
