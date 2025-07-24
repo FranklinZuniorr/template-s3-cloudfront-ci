@@ -190,7 +190,9 @@ jobs:
             const previewDomainNameUrl = `https://${domain_name}/${prefix}`;
             const previewAlternateDomain = `https://${alternate_domain}/${prefix}`;
 
-            const previewUrl = alternate_domain ? previewAlternateDomain : previewDomainNameUrl;
+            const isValidAlternate = alternate_domain && alternate_domain !== 'None';
+
+            const previewUrl = isValidAlternate ? previewAlternateDomain : previewDomainNameUrl;
 
             await github.rest.issues.createComment({
               issue_number: prNumber,
