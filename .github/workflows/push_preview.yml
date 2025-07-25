@@ -191,7 +191,7 @@ jobs:
           echo "🕒 Last modified: $LAST_MODIFIED"
           echo "🔁 Time since modification: $DELTA seconds"
       
-          THRESHOLD_SECONDS=1800
+          THRESHOLD_SECONDS=300
       
           if [ "$DELTA" -lt "$THRESHOLD_SECONDS" ]; then
             echo "✅ Parameter was modified recently."
