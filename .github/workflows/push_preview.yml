@@ -193,7 +193,7 @@ jobs:
           
       - name: Upload to S3
         run: |
-          aws s3 sync ./build s3://$S3_BUCKET_NAME --delete --exact-timestamps
+          aws s3 sync ./build "s3://${S3_BUCKET_NAME}/${PREVIEW_PREFIX}" --delete
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
