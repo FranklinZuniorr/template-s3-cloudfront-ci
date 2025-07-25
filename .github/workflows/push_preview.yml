@@ -124,7 +124,7 @@ jobs:
           fi
 
           if aws ssm get-parameter --name "$AWS_PREVIEW_PARAM_NAME" &> /dev/null; then
-            echo "❌ Parameter $AWS_PREVIEW_PARAM_NAME already exist"
+            echo "✅ Parameter $AWS_PREVIEW_PARAM_NAME already exist"
           else
             echo "Creating new parameter $AWS_PREVIEW_PARAM_NAME"
             aws ssm put-parameter \
