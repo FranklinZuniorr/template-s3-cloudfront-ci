@@ -136,10 +136,12 @@ jobs:
           fi
 
       - name: Create .env file from GitHub API
+        id: create_env
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
           AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
         run: |
           PARAM_PATH="${AWS_PREVIEW_PARAM_NAME}"
@@ -156,6 +158,20 @@ jobs:
           if [ -z "$CONTENT" ]; then
             echo "❌ Failed to download content or content is empty."
             exit 1
+          fi
+
+          PARAM_PATH_STAGE_SSM_PARAMETER_PATH="${AWS_SSM_PARAMETER_PATH}"
+
+          CONTENT_STAGE_SSM_PARAMETER_PATH=$(aws ssm get-parameter --name "$PARAM_PATH_STAGE_SSM_PARAMETER_PATH" --with-decryption --query Parameter.Value --output text)
+
+          if [ -z "$CONTENT_STAGE_SSM_PARAMETER_PATH" ]; then
+            echo "❌ Failed to download content or content is empty."
+            exit 1
+          fi
+
+          if [ "$CONTENT" != "$CONTENT_STAGE_SSM_PARAMETER_PATH" ]; then
+            echo "✅ Detected updtaes in $PARAM_PATH"
+            echo "has_detected_atts_preview_param=UPDATE" >> $GITHUB_OUTPUT
           fi
 
           printf "%s" "$CONTENT" > .env
@@ -201,11 +217,22 @@ jobs:
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         
       - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP'
+        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.create_env.outputs.has_detected_atts_preview_param != 'UPDATE'
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
             --paths ${{ steps.detect_changes.outputs.paths }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
+      - name: Invalidate CloudFront cache (all)
+        if: steps.create_env.outputs.has_detected_atts_preview_param == 'UPDATE'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
