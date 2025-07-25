@@ -102,6 +102,7 @@ jobs:
             });
 
       - name: AWS SSM new parameter - Project envs
+        id: create_preview_aws_ssm_parameter
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -125,6 +126,7 @@ jobs:
 
           if aws ssm get-parameter --name "$AWS_PREVIEW_PARAM_NAME" &> /dev/null; then
             echo "✅ Parameter $AWS_PREVIEW_PARAM_NAME already exist"
+            echo "has_created_preview_aws_ssm_parameter=NO" >> $GITHUB_OUTPUT
           else
             echo "Creating new parameter $AWS_PREVIEW_PARAM_NAME"
             aws ssm put-parameter \
@@ -133,6 +135,7 @@ jobs:
               --type String \
               --tier Standard \
               --overwrite
+            echo "has_created_preview_aws_ssm_parameter=YES" >> $GITHUB_OUTPUT
           fi
 
       - name: Create .env file from AWS SSM parameter store
@@ -165,6 +168,7 @@ jobs:
 
       - name: Check if SSM Parameter was modified recently
         id: check_recent_ssm_update
+        if: steps.create_preview_aws_ssm_parameter.outputs.has_created_preview_aws_ssm_parameter == 'NO'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
