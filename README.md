@@ -115,7 +115,7 @@ These secrets are prefixed with `STAGE_` for your staging environment:
 
   * `STAGE_AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables specific to your project in stage environment.
 
-  > 💡 **Note:** Always when some pull-request is created, one AWS SSM Parameter Store is created with auto refering PR number, ".env.stage.pr.x.respository-name".
+  > 💡 **Note:** Always when some pull-request is created, one AWS SSM Parameter Store is created with auto refering PR number, ".env.stage.pr.x".
 
   > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
