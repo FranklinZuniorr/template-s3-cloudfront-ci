@@ -209,6 +209,9 @@ jobs:
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096"
           export REACT_APP_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+          export NEXT_PUBLIC_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+          export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
+          export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
           yarn build
 
       - name: Detect changed files
