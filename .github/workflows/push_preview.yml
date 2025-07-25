@@ -135,7 +135,7 @@ jobs:
               --overwrite
           fi
 
-      - name: Create .env file from GitHub API
+      - name: Create .env file from AWS SSM parameter store
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
