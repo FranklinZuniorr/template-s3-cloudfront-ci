@@ -162,17 +162,30 @@ jobs:
 
           PARAM_PATH_STAGE_SSM_PARAMETER_PATH="${AWS_SSM_PARAMETER_PATH}"
 
-          CONTENT_STAGE_SSM_PARAMETER_PATH=$(aws ssm get-parameter --name "$PARAM_PATH_STAGE_SSM_PARAMETER_PATH" --with-decryption --query Parameter.Value --output text)
+          echo "📥 Downloading base .env from: $PARAM_PATH_STAGE_SSM_PARAMETER_PATH"
+
+          CONTENT_STAGE_SSM_PARAMETER_PATH=$(aws ssm get-parameter \
+            --name "$PARAM_PATH_STAGE_SSM_PARAMETER_PATH" \
+            --with-decryption \
+            --query Parameter.Value \
+            --output text)
 
           if [ -z "$CONTENT_STAGE_SSM_PARAMETER_PATH" ]; then
             echo "❌ Failed to download content or content is empty."
             exit 1
           fi
 
-          if [ "$CONTENT" != "$CONTENT_STAGE_SSM_PARAMETER_PATH" ]; then
-            echo "✅ Detected updtaes in $PARAM_PATH"
+          echo "$CONTENT" | sort | sed 's/[[:space:]]*$//' > preview.env
+          echo "$CONTENT_STAGE_SSM_PARAMETER_PATH" | sort | sed 's/[[:space:]]*$//' > base.env
+
+          if ! diff -q preview.env base.env > /dev/null; then
+            echo "✅ Detected updates in $PARAM_PATH"
             echo "has_detected_atts_preview_param=UPDATE" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ No relevant updates detected in $PARAM_PATH"
           fi
+
+          rm -f preview.env base.env
 
           printf "%s" "$CONTENT" > .env
 
