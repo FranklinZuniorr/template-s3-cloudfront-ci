@@ -19,11 +19,52 @@ This CI pipeline streamlines the **building and deployment of static application
 
 To ensure dynamic routing and seamless integration, configure your frontend project (e.g., with Vite + React) as follows:
 
-  * **React Router DOM**: When using `react-router-dom` with `createBrowserRouter`, set the `basename` using the environment variable `REACT_APP_BROWSER_ROUTER_BASENAME`. This variable will be exposed during the CI build process.
+  * **React Router DOM**: When using `react-router-dom` with `createBrowserRouter`, set the `basename` using the environment variable `import.meta.env.REACT_APP_BROWSER_ROUTER_BASENAME`. This variable will be exposed during the CI build process.
   * **Vite Configuration**: In your `vite.config.ts`, define the `base` property like this:
     ```typescript
     base: process.env.REACT_APP_BROWSER_ROUTER_BASENAME || '/',
     ```
+
+### 🌐 `BASENAME` Configuration for Multiple Frameworks
+
+During the CI build process, the value of the `PREVIEW_PREFIX` environment variable is used to define the **basename** (or base path) of the application — i.e., the subdirectory where the app will be served (e.g., `/preview-123/`).
+
+The following environment variables are exported and customized for each supported framework to ensure proper routing behavior when deployed under a subpath:
+
+```bash
+export REACT_APP_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+export NEXT_PUBLIC_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
+export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+````
+
+#### 🔹 React (Create React App)
+
+* **Variable:** `REACT_APP_BROWSER_ROUTER_BASENAME`
+* **Usage:** Passed to `<BrowserRouter basename={...}>`
+* **Accessed via:** `process.env.REACT_APP_BROWSER_ROUTER_BASENAME`
+
+#### 🔹 Next.js
+
+* **Variable:** `NEXT_PUBLIC_BASENAME`
+* **Usage:** Used for custom route handling or asset paths
+* **Accessed via:** `process.env.NEXT_PUBLIC_BASENAME`
+
+#### 🔹 Angular
+
+* **Variable:** `NG_APP_BASENAME`
+* **Usage:** Used as `APP_BASE_HREF` or passed to `--base-href` during build
+* **Accessed via:** Depends on strategy (recommends `@ngx-env/builder`)
+
+#### 🔹 Vue.js (Vue CLI)
+
+* **Variable:** `VUE_APP_BASENAME`
+* **Usage:** Used to configure `publicPath` in `vue.config.js`
+* **Accessed via:** `process.env.VUE_APP_BASENAME`
+
+### 🛠️ Note
+
+Each variable follows the environment conventions of its respective framework and should be used during build time or app initialization. This ensures the application works correctly when deployed under a subdirectory (`/${PREVIEW_PREFIX}/`).
 
 ### 📌 Why set the basename?
 
@@ -42,13 +83,6 @@ The app may break when accessed from a subdirectory:
 
 - Routes may return **404**
 - Static assets may **fail to load**
-
-#### 💡 Note for other types of projects
-
-Even if you're not using **React** or **Vite** — for example, a project with plain HTML, Angular, or another bundler — a similar configuration is essential:
-
-- In **pure HTML** projects, set a `<base href="/my-app/">` tag inside the `<head>` to ensure all relative paths for links, scripts, and stylesheets resolve correctly.
-- In **Angular**, configure the `baseHref` in `angular.json` or via the CLI build flag `--base-href`.
 
 #### 🔁 Always match the deployed subpath
 Avoid broken links and routing issues by ensuring the subpath used in your configuration matches the one used during deployment — **regardless of the framework or setup** you're using.
@@ -81,7 +115,7 @@ These secrets are prefixed with `STAGE_` for your staging environment:
 
   * `STAGE_AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables specific to your project in stage environment.
 
-  > 💡 **Note:** Always when some pull-request is created, one AWS SSM Parameter Store is created with auto refering PR number, ".env.stage.pr.x".
+  > 💡 **Note:** Always when some pull-request is created, one AWS SSM Parameter Store is created with auto refering PR number, ".env.stage.pr.x.respository-name".
 
   > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
 
