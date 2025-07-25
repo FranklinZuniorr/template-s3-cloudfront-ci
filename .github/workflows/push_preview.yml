@@ -175,17 +175,14 @@ jobs:
             exit 1
           fi
 
-          echo "$CONTENT" | sort | sed 's/[[:space:]]*$//' > preview.env
-          echo "$CONTENT_STAGE_SSM_PARAMETER_PATH" | sort | sed 's/[[:space:]]*$//' > base.env
+          NORMALIZED_1=$(echo "$CONTENT" | sort | sed 's/[[:space:]]*$//')
+          NORMALIZED_2=$(echo "$CONTENT_STAGE_SSM_PARAMETER_PATH" | sort | sed 's/[[:space:]]*$//')
 
-          if ! diff -q preview.env base.env > /dev/null; then
-            echo "✅ Detected updates in $PARAM_PATH"
-            echo "has_detected_atts_preview_param=UPDATE" >> $GITHUB_OUTPUT
+          if [ "$NORMALIZED_1" != "$NORMALIZED_2" ]; then
+            echo "✅ Detected updates"
           else
             echo "ℹ️ No relevant updates detected in $PARAM_PATH"
           fi
-
-          rm -f preview.env base.env
 
           printf "%s" "$CONTENT" > .env
 
