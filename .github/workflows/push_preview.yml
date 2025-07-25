@@ -244,7 +244,7 @@ jobs:
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         
       - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.check_recent_ssm_update.outputs.has_recent_modification == 'NO'
+        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.check_recent_ssm_update.outputs.has_recent_modification != 'YES'
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
