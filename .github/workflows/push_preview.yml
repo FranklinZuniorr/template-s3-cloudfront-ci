@@ -166,43 +166,16 @@ jobs:
 
           echo "✅ File .env created from SSM Parameter Store"
 
-      - name: Check if SSM Parameter was modified recently
-        id: check_recent_ssm_update
+      - name: Check if this is a rerun
+        id: check_rerun
         if: steps.create_preview_aws_ssm_parameter.outputs.has_created_preview_aws_ssm_parameter == 'NO'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
         run: |
-          echo "📦 Checking last modified date for SSM parameter: $AWS_PREVIEW_PARAM_NAME"
-      
-          LAST_MODIFIED=$(aws ssm describe-parameters \
-            --parameter-filters "Key=Name,Values=$AWS_PREVIEW_PARAM_NAME" \
-            --query "Parameters[0].LastModifiedDate" \
-            --output text)
-      
-          if [ "$LAST_MODIFIED" == "None" ] || [ -z "$LAST_MODIFIED" ]; then
-            echo "❌ Parameter not found or no modification date."
-            echo "has_recent_modification=NO" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-      
-          LAST_TS=$(date -d "$LAST_MODIFIED" +%s)
-          NOW_TS=$(date +%s)
-          DELTA=$((NOW_TS - LAST_TS))
-      
-          echo "🕒 Last modified: $LAST_MODIFIED"
-          echo "🔁 Time since modification: $DELTA seconds"
-      
-          THRESHOLD_SECONDS=300
-      
-          if [ "$DELTA" -lt "$THRESHOLD_SECONDS" ]; then
-            echo "✅ Parameter was modified recently."
-            echo "has_recent_modification=YES" >> $GITHUB_OUTPUT
+          if [[ ${{ github.run_attempt }} -gt 1 ]]; then
+            echo "✅ Rerun is detected."
+            echo "has_rerun=YES" >> $GITHUB_OUTPUT
           else
-            echo "ℹ️ Parameter was not modified recently."
-            echo "has_recent_modification=NO" >> $GITHUB_OUTPUT
+            echo "ℹ️ None rerun detected."
+            echo "has_rerun=NO" >> $GITHUB_OUTPUT
           fi
           
       - name: Build project
@@ -247,7 +220,7 @@ jobs:
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         
       - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.check_recent_ssm_update.outputs.has_recent_modification != 'YES'
+        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.check_rerun.outputs.has_rerun != 'YES'
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
@@ -259,7 +232,7 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Invalidate CloudFront cache (all)
-        if: steps.check_recent_ssm_update.outputs.has_recent_modification == 'YES'
+        if: steps.check_rerun.outputs.has_rerun == 'YES'
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
