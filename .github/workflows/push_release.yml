@@ -2,6 +2,10 @@ name: Release
 
 on:
   workflow_call:
+    inputs:
+      project_build_envs:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -14,8 +18,6 @@ on:
       CLOUDFRONT_DISTRIBUTION_ID:
         required: true
       WF_GITHUB_TOKEN:
-        required: true
-      AWS_SSM_PARAMETER_PATH:
         required: true
 
 jobs:
@@ -45,32 +47,12 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Create .env file from AWS SSM parameter store
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
+      - name: Create .env by "project_build_envs" input
         run: |
-          PARAM_PATH="${AWS_SSM_PARAMETER_PATH}"
-
-          if [ -z "$PARAM_PATH" ]; then
-            echo "❌ None parameter path provided."
-            exit 1
-          fi
-
-          echo "📥 Downloading .env content from AWS SSM Parameter Store: $PARAM_PATH"
-
-          CONTENT=$(aws ssm get-parameter --name "$PARAM_PATH" --with-decryption --query Parameter.Value --output text)
-
-          if [ -z "$CONTENT" ]; then
-            echo "❌ Failed to download content or content is empty."
-            exit 1
-          fi
-
-          printf "%s" "$CONTENT" > .env
-
-          echo "✅ File .env created from SSM Parameter Store"
+          printf "%s" "$PROJECT_ENVS" > .env
+          echo "✅ File .env created from input"
+        env:
+          PROJECT_ENVS: ${{ inputs.project_build_envs }}
 
       - name: Build project
         run: |
@@ -80,29 +62,6 @@ jobs:
           export NG_APP_BASENAME="/"
           export VUE_APP_BASENAME="/"
           yarn build
-
-      - name: Detect changed files
-        id: detect_changes
-        run: |
-          CHANGED_FILES=$(aws s3 sync ./build s3://$S3_BUCKET_NAME --size-only --dryrun \
-            | grep 'upload:' \
-            | awk '{sub(/^\.\/build/, "", $3); print $3}' \
-            | sed 's/^/\//' \
-            | tr '\n' ' ')
-      
-          echo "Changed files: $CHANGED_FILES"
-          
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No files changed. Skipping invalidation."
-            echo "paths=SKIP" >> $GITHUB_OUTPUT
-          else
-            echo "paths=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         
       - name: Upload to S3
         run: |
@@ -112,18 +71,16 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-      
-      - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP'
+
+      - name: Invalidate CloudFront cache (index.html ONLY)
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-            --paths ${{ steps.detect_changes.outputs.paths }}
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}   
         
       - name: Get CloudFront Domain Name and Alternate Name
         id: get_cf_domain

@@ -15,6 +15,9 @@ on:
         required: false
         type: boolean
         default: true
+      project_build_envs:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -28,8 +31,6 @@ on:
         required: true
       WF_GITHUB_TOKEN:
         required: true
-      AWS_SSM_PARAMETER_PATH:
-        required: true
 
 jobs:
   preview:
@@ -37,7 +38,6 @@ jobs:
 
     env:
       PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
-      AWS_PR_SSM_PARAMETER: .env.stage.pr.${{ github.event.pull_request.number }}.${{ github.event.repository.name }}
 
     steps:
       - name: Checkout code
@@ -101,82 +101,12 @@ jobs:
               ![Coverage GIF](https://i.giphy.com/XIqCQx02E1U9W.webp)`
             });
 
-      - name: AWS SSM new parameter - Project envs
-        id: create_preview_aws_ssm_parameter
+      - name: Create .env by "project_build_envs" input
+        run: |
+          printf "%s" "$PROJECT_ENVS" > .env
+          echo "✅ File .env created from input"
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
-          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
-        run: |
-          PARAM_PATH="${AWS_SSM_PARAMETER_PATH}"
-
-          if [ -z "$PARAM_PATH" ]; then
-            echo "❌ None parameter path provided."
-            exit 1
-          fi
-
-          CONTENT=$(aws ssm get-parameter --name "$PARAM_PATH" --with-decryption --query Parameter.Value --output text)
-
-          if [ -z "$CONTENT" ]; then
-            echo "❌ Failed to download content or content is empty."
-            exit 1
-          fi
-
-          if aws ssm get-parameter --name "$AWS_PREVIEW_PARAM_NAME" &> /dev/null; then
-            echo "✅ Parameter $AWS_PREVIEW_PARAM_NAME already exist"
-            echo "has_created_preview_aws_ssm_parameter=NO" >> $GITHUB_OUTPUT
-          else
-            echo "Creating new parameter $AWS_PREVIEW_PARAM_NAME"
-            aws ssm put-parameter \
-              --name "$AWS_PREVIEW_PARAM_NAME" \
-              --value "$CONTENT" \
-              --type String \
-              --tier Standard \
-              --overwrite
-            echo "has_created_preview_aws_ssm_parameter=YES" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create .env file from AWS SSM parameter store
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
-          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
-        run: |
-          PARAM_PATH="${AWS_PREVIEW_PARAM_NAME}"
-
-          if [ -z "$PARAM_PATH" ]; then
-            echo "❌ None parameter path provided."
-            exit 1
-          fi
-
-          echo "📥 Downloading .env content from AWS SSM Parameter Store: $PARAM_PATH"
-
-          CONTENT=$(aws ssm get-parameter --name "$PARAM_PATH" --with-decryption --query Parameter.Value --output text)
-
-          if [ -z "$CONTENT" ]; then
-            echo "❌ Failed to download content or content is empty."
-            exit 1
-          fi
-
-          printf "%s" "$CONTENT" > .env
-
-          echo "✅ File .env created from SSM Parameter Store"
-
-      - name: Check if this is a rerun
-        id: check_rerun
-        if: steps.create_preview_aws_ssm_parameter.outputs.has_created_preview_aws_ssm_parameter == 'NO'
-        run: |
-          if [[ ${{ github.run_attempt }} -gt 1 ]]; then
-            echo "✅ Rerun is detected."
-            echo "has_rerun=YES" >> $GITHUB_OUTPUT
-          else
-            echo "ℹ️ None rerun detected."
-            echo "has_rerun=NO" >> $GITHUB_OUTPUT
-          fi
+          PROJECT_ENVS: ${{ inputs.project_build_envs }}
           
       - name: Build project
         run: |
@@ -186,29 +116,6 @@ jobs:
           export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
           export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
           yarn build
-
-      - name: Detect changed files
-        id: detect_changes
-        run: |
-          CHANGED_FILES=$(aws s3 sync ./build s3://$S3_BUCKET_NAME --size-only --dryrun \
-            | grep 'upload:' \
-            | awk '{sub(/^\.\/build/, "", $3); print $3}' \
-            | sed 's/^/\//' \
-            | tr '\n' ' ')
-      
-          echo "Changed files: $CHANGED_FILES"
-          
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No files changed. Skipping invalidation."
-            echo "paths=SKIP" >> $GITHUB_OUTPUT
-          else
-            echo "paths=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
           
       - name: Upload to S3
         run: |
@@ -218,29 +125,16 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-        
-      - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP' && steps.check_rerun.outputs.has_rerun != 'YES'
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-            --paths ${{ steps.detect_changes.outputs.paths }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
-      - name: Invalidate CloudFront cache (all)
-        if: steps.check_rerun.outputs.has_rerun == 'YES'
+      - name: Invalidate CloudFront cache (index.html ONLY)
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}        
 
       - name: Get CloudFront Domain Name and Alternate Name
         id: get_cf_domain

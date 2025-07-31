@@ -18,19 +18,8 @@ jobs:
 
     env:
         PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
-        AWS_PR_SSM_PARAMETER: .env.stage.pr.${{ github.event.pull_request.number }}.${{ github.event.repository.name }}
 
     steps:
-      - name: Delete AWS SSM stale parameter
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_PREVIEW_PARAM_NAME: ${{ env.AWS_PR_SSM_PARAMETER }}
-        run: |
-          echo "🧹 Deleting stale parameter: $AWS_PREVIEW_PARAM_NAME"
-          aws ssm delete-parameter --name "$AWS_PREVIEW_PARAM_NAME"
-
       - name: Remove preview folder from S3
         run: |
           aws s3 rm "s3://${{ secrets.S3_BUCKET_NAME }}/${{ env.PREVIEW_PREFIX }}" --recursive

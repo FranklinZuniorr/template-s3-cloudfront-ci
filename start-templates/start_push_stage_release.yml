@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
+    inputs:
+      project_build_envs: ${{ vars.stage_project_build_envs }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGE_AWS_SECRET_ACCESS_KEY }}
