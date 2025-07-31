@@ -12,7 +12,7 @@ jobs:
       run_tests: false
       run_lint: true
       run_tsc: true
-      project_build_envs: ${{ vars.stage_project_build_envs }}
+      project_build_envs: ${{ vars.STAGE_PROJECT_BUILD_ENVS }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGE_AWS_SECRET_ACCESS_KEY }}
