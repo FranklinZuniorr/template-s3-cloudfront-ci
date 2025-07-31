@@ -96,7 +96,7 @@ To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in
   * `start_push_prod_release.yml`
   * `start_push_stage_release.yml`
 
-## GitHub Actions Secrets
+## GitHub Actions `Secrets`
 
 For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings:
 
@@ -111,14 +111,6 @@ These secrets are prefixed with `STAGE_` for your staging environment:
   * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
   * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
 
-  > 📜 AWS SSM Parameter - Project envs
-
-  * `STAGE_AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables specific to your project in stage environment.
-
-  > 💡 **Note:** Always when some pull-request is created, one AWS SSM Parameter Store is created with auto refering PR number, ".env.stage.pr.x".
-
-  > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
-
 #### Production Secrets
 
 These secrets are for your production environment:
@@ -130,11 +122,21 @@ These secrets are for your production environment:
   * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the production environment.
   * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
 
-  > 📜 AWS SSM Parameter - Project envs
+## GitHub Actions `Variables`
 
-  * `AWS_SSM_PARAMETER_PATH`: **Name** of the parameter in AWS SSM Parameter Store that contains environment variables for your project in production environment.
+For the CI pipeline to function correctly, you must add the following **variables** to your repository's "Actions" settings:
 
-  > 💡 **Important:** All parameters must be stored as **String** type values in AWS SSM Parameter Store.
+#### Stage Variables
+
+These variables are prefixed with `STAGE_` for your staging environment:
+
+  * `STAGE_PROJECT_BUILD_ENVS`: Your FRONT-END project envs of `stage` environment.
+
+#### Production Variables
+
+These variables are for your production environment:
+
+  * `PROJECT_BUILD_ENVS`: Your FRONT-END project envs of `prod` environment.
 
 ## PUSH PREVIEW CI INPUTS
 
