@@ -12,7 +12,6 @@ jobs:
       run_tests: false
       run_lint: true
       run_tsc: true
-      project_build_envs: ${{ vars.stage_project_build_envs }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGE_AWS_SECRET_ACCESS_KEY }}
@@ -21,3 +20,4 @@ jobs:
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGE_CLOUDFRONT_DISTRIBUTION_ID }}
       WF_GITHUB_TOKEN: ${{ secrets.STAGE_WF_GITHUB_TOKEN }}
       AWS_SSM_PARAMETER_PATH: ${{ secrets.STAGE_AWS_SSM_PARAMETER_PATH }}
+      PROJECT_BUILD_ENVS: ${{ secrets.STAGE_PROJECT_BUILD_ENVS }}

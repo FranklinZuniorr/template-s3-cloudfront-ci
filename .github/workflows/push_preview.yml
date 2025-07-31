@@ -15,9 +15,6 @@ on:
         required: false
         type: boolean
         default: true
-      project_build_envs:
-        required: true
-        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -30,6 +27,8 @@ on:
       CLOUDFRONT_DISTRIBUTION_ID:
         required: true
       WF_GITHUB_TOKEN:
+        required: true
+      PROJECT_BUILD_ENVS:
         required: true
 
 jobs:
@@ -106,7 +105,7 @@ jobs:
           printf "%s" "$PROJECT_ENVS" > .env
           echo "✅ File .env created from input"
         env:
-          PROJECT_ENVS: ${{ inputs.project_build_envs }}
+          PROJECT_ENVS: ${{ secrets.PROJECT_BUILD_ENVS }}
           
       - name: Build project
         run: |
