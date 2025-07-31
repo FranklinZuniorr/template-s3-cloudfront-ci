@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
+    with:
+      project_build_envs: ${{ vars.project_build_envs }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -17,4 +19,3 @@ jobs:
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
       WF_GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
       AWS_SSM_PARAMETER_PATH: ${{ secrets.AWS_SSM_PARAMETER_PATH }}
-      PROJECT_BUILD_ENVS: ${{ secrets.PROJECT_BUILD_ENVS }}
