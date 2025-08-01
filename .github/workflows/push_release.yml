@@ -129,7 +129,7 @@ jobs:
         if: steps.check_full_invalidation.outputs.has_full_invalidation == 'yes'
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/index.html"
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -140,7 +140,7 @@ jobs:
         if: steps.check_full_invalidation.outputs.has_full_invalidation == 'no'
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/*"
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
