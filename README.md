@@ -98,22 +98,24 @@ To set up the CI/CD pipeline, you need to create a `.github/workflows` folder in
 
 ## GitHub Actions `Secrets`
 
-For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings:
+For the CI pipeline to function correctly, you must add the following **secrets** to your repository's "Actions" settings to each `environment`:
+
+- Should create `stage` and `prod` environments.
 
 #### Stage Secrets
 
-These secrets are prefixed with `STAGE_` for your staging environment:
+Secrets for your `stage` environment:
 
-  * `STAGE_AWS_ACCESS_KEY_ID`: Your AWS IAM access key ID.
-  * `STAGE_AWS_SECRET_ACCESS_KEY`: Your AWS IAM secret access key.
-  * `STAGE_AWS_REGION`: The AWS region where your S3 bucket is located.
-  * `STAGE_S3_BUCKET_NAME`: The name of your S3 bucket for the stage environment.
-  * `STAGE_CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
-  * `STAGE_WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
+  * `AWS_ACCESS_KEY_ID`: Your AWS IAM access key ID.
+  * `AWS_SECRET_ACCESS_KEY`: Your AWS IAM secret access key.
+  * `AWS_REGION`: The AWS region where your S3 bucket is located.
+  * `S3_BUCKET_NAME`: The name of your S3 bucket for the stage environment.
+  * `CLOUDFRONT_DISTRIBUTION_ID`: The CloudFront distribution ID for the stage environment.
+  * `WF_GITHUB_TOKEN`: A GitHub classic token with `repo` permissions, used for workflow operations.
 
 #### Production Secrets
 
-These secrets are for your production environment:
+Secrets for your `prod` environment:
 
   * `AWS_ACCESS_KEY_ID`: Your AWS IAM access key ID.
   * `AWS_SECRET_ACCESS_KEY`: Your AWS IAM secret access key.
@@ -124,17 +126,19 @@ These secrets are for your production environment:
 
 ## GitHub Actions `Variables`
 
-For the CI pipeline to function correctly, you must add the following **variables** to your repository's "Actions" settings:
+For the CI pipeline to function correctly, you must add the following **variables** to your repository's "Actions" settings to each `environment`:
+
+- Should create `stage` and `prod` environments.
 
 #### Stage Variables
 
-These variables are prefixed with `STAGE_` for your staging environment:
+Variables for your `stage` environment:
 
-  * `STAGE_PROJECT_BUILD_ENVS`: Your FRONT-END project envs of `stage` environment.
+  * `PROJECT_BUILD_ENVS`: Your FRONT-END project envs of `stage` environment.
 
 #### Production Variables
 
-These variables are for your production environment:
+Variables for your `prod` environment:
 
   * `PROJECT_BUILD_ENVS`: Your FRONT-END project envs of `prod` environment.
 

@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
+    environment:
+      name: prod
     with:
       project_build_envs: ${{ vars.PROJECT_BUILD_ENVS }}
     secrets:
