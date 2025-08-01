@@ -118,30 +118,7 @@ jobs:
           export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
           export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
           yarn build
-
-      - name: Detect changed files
-        id: detect_changes
-        run: |
-          CHANGED_FILES=$(aws s3 sync ./build s3://$S3_BUCKET_NAME --size-only --dryrun \
-            | grep 'upload:' \
-            | awk '{sub(/^\.\/build/, "", $3); print $3}' \
-            | sed 's/^/\//' \
-            | tr '\n' ' ')
-      
-          echo "Changed files: $CHANGED_FILES"
-
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No files changed. Skipping invalidation."
-            echo "paths=SKIP" >> $GITHUB_OUTPUT
-          else
-            echo "paths=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-
+          
       - name: Upload to S3
         run: |
           aws s3 sync ./build "s3://${S3_BUCKET_NAME}/${PREVIEW_PREFIX}" --delete
@@ -151,22 +128,10 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
-      - name: Invalidate CloudFront cache (only changed files)
-        if: steps.detect_changes.outputs.paths != 'SKIP'
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-            --paths ${{ steps.detect_changes.outputs.paths }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
-
       - name: Invalidate CloudFront cache (index.html ONLY)
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/index.html"
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
