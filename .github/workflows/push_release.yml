@@ -75,7 +75,16 @@ jobs:
         
       - name: Upload to S3
         run: |
-          aws s3 sync ./build s3://$S3_BUCKET_NAME --delete --exact-timestamps
+          aws s3 sync ./build s3://$S3_BUCKET_NAME --delete \
+
+          aws s3 cp ./build/ s3://$S3_BUCKET_NAME --recursive \
+            --exclude "index.html" \
+            --cache-control "max-age=86400, public" \
+            --metadata-directive REPLACE
+
+          aws s3 cp ./build/index.html s3://$S3_BUCKET_NAME/index.html \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --metadata-directive REPLACE
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
