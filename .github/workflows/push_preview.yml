@@ -35,6 +35,8 @@ on:
 jobs:
   preview:
     runs-on: ubuntu-latest
+    environment:
+      name: stage
 
     env:
       PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}

@@ -6,6 +6,10 @@ on:
       project_build_envs:
         required: true
         type: string
+      environment_type:
+        required: true
+        type: string
+        default: prod
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -24,6 +28,8 @@ jobs:
   setup:
     name: preparing
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_type }}
 
     steps:
       - name: Checkout

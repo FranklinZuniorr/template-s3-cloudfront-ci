@@ -13,6 +13,7 @@ jobs:
       name: prod
     with:
       project_build_envs: ${{ vars.PROJECT_BUILD_ENVS }}
+      environment_type: prod
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
