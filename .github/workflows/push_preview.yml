@@ -131,7 +131,7 @@ jobs:
       - name: Invalidate CloudFront cache (index.html ONLY)
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/index.html"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
