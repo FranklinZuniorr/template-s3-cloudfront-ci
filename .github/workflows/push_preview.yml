@@ -142,7 +142,7 @@ jobs:
         run: |
           DIST_ID="${CLOUDFRONT_DISTRIBUTION_ID}"
           
-          echo "🔍 Searching invalidations $DIST_ID..."
+          echo "🔍 Searching invalidations"
           IDS=$(aws cloudfront list-invalidations \
             --distribution-id "$DIST_ID" \
             --query "InvalidationList.Items[].Id" \
