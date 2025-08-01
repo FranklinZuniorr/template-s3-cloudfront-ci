@@ -91,15 +91,61 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
-      - name: Invalidate CloudFront cache (index.html ONLY)
+      - name: Verify if has some invalidation with "/*" path
+        id: check_full_invalidation
         run: |
-          aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
+          DIST_ID="${CLOUDFRONT_DISTRIBUTION_ID}"
+          
+          echo "🔍 Searching invalidations $DIST_ID..."
+          IDS=$(aws cloudfront list-invalidations \
+            --distribution-id "$DIST_ID" \
+            --query "InvalidationList.Items[].Id" \
+            --output text)
+
+          FOUND="no"
+
+          for ID in $IDS; do
+            MATCH=$(aws cloudfront get-invalidation \
+              --distribution-id "$DIST_ID" \
+              --id "$ID" \
+              --query "Invalidation.InvalidationBatch.Paths.Items" \
+              --output text | grep -Fx "/*" || true)
+
+            if [[ "$MATCH" == "/*" ]]; then
+              FOUND="yes"
+              break
+            fi
+          done
+
+          echo "✅ Invalidation founded? $FOUND"
+          echo "has_full_invalidation=$FOUND" >> "$GITHUB_OUTPUT"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}   
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+  
+      - name: Invalidate CloudFront cache (index.html ONLY)
+        if: steps.check_full_invalidation.outputs.has_full_invalidation == 'yes'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/index.html"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}  
+          
+      - name: Invalidate CloudFront cache (ALL)
+        if: steps.check_full_invalidation.outputs.has_full_invalidation == 'no'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/${PREVIEW_PREFIX}/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         
       - name: Get CloudFront Domain Name and Alternate Name
         id: get_cf_domain
