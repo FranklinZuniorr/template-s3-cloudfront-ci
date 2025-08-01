@@ -10,6 +10,7 @@ jobs:
   deploy:
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_release.yml@main
     with:
+      has_semantic_release: false
       project_build_envs: ${{ vars.PROJECT_BUILD_ENVS }}
       environment_type: stage
     secrets:
