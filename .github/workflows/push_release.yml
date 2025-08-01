@@ -132,6 +132,7 @@ jobs:
           ALTERNATE_DOMAIN: ${{ steps.get_cf_domain.outputs.alternate_name }}
         
       - name: Semantic release
+        if: inputs.has_semantic_release == true
         env:
           GITHUB_TOKEN: ${{ secrets.WF_GITHUB_TOKEN }}
         run: yarn release
