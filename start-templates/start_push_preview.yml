@@ -7,6 +7,9 @@ on:
 
 jobs:
   deploy:
+    if: |
+        github.event.pull_request.head.ref != 'main' &&
+        github.event.pull_request.head.ref != 'stage'
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_preview.yml@main
     with:
       run_tests: false
