@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     uses: FranklinZuniorr/template-s3-cloudfront-ci/.github/workflows/push_preview.yml@main
-    environment:
-      name: stage
     with:
       run_tests: false
       run_lint: true
