@@ -19,10 +19,10 @@ This CI pipeline streamlines the **building and deployment of static application
 
 To ensure dynamic routing and seamless integration, configure your frontend project (e.g., with Vite + React) as follows:
 
-  * **React Router DOM**: When using `react-router-dom` with `createBrowserRouter`, set the `basename` using the environment variable `import.meta.env.REACT_APP_BROWSER_ROUTER_BASENAME`. This variable will be exposed during the CI build process.
+  * **React Router DOM**: When using `react-router-dom` with `createBrowserRouter`, set the `basename` using the environment variable `import.meta.env.VITE_BROWSER_ROUTER_BASENAME`. This variable will be exposed during the CI build process.
   * **Vite Configuration**: In your `vite.config.ts`, define the `base` property like this:
     ```typescript
-    base: process.env.REACT_APP_BROWSER_ROUTER_BASENAME || '/',
+    base: process.env.VITE_BROWSER_ROUTER_BASENAME || '/',
     ```
 
 ### 🌐 `BASENAME` Configuration for Multiple Frameworks
@@ -32,11 +32,18 @@ During the CI build process, the value of the `PREVIEW_PREFIX` environment varia
 The following environment variables are exported and customized for each supported framework to ensure proper routing behavior when deployed under a subpath:
 
 ```bash
+export VITE_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 export REACT_APP_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 export NEXT_PUBLIC_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
 export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 ````
+
+#### 🔹 Vite
+
+* **Variable:** `VITE_BROWSER_ROUTER_BASENAME`
+* **Usage:** Passed to `<BrowserRouter basename={...}>` and "base" property in vite.config
+* **Accessed via:** `import.meta.env.VITE_BROWSER_ROUTER_BASENAME`
 
 #### 🔹 React (Create React App)
 
