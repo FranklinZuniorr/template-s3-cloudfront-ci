@@ -68,7 +68,7 @@ jobs:
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096"
           export VITE_BROWSER_ROUTER_BASENAME="/"
-          export REACT_APP_BROWSER_ROUTER_BASENAME="/"
+          export PUBLIC_URL="/"
           export NEXT_PUBLIC_BASENAME="/"
           export NG_APP_BASENAME="/"
           export VUE_APP_BASENAME="/"

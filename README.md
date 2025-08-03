@@ -33,7 +33,7 @@ The following environment variables are exported and customized for each support
 
 ```bash
 export VITE_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
-export REACT_APP_BROWSER_ROUTER_BASENAME="/${{ env.PREVIEW_PREFIX }}"
+export PUBLIC_URL="/${{ env.PREVIEW_PREFIX }}"
 export NEXT_PUBLIC_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 export NG_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}/"
 export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
@@ -47,9 +47,9 @@ export VUE_APP_BASENAME="/${{ env.PREVIEW_PREFIX }}"
 
 #### 🔹 React (Create React App)
 
-* **Variable:** `REACT_APP_BROWSER_ROUTER_BASENAME`
+* **Variable:** `PUBLIC_URL`
 * **Usage:** Passed to `<BrowserRouter basename={...}>`
-* **Accessed via:** `process.env.REACT_APP_BROWSER_ROUTER_BASENAME`
+* **Accessed via:** `process.env.PUBLIC_URL`
 
 #### 🔹 Next.js
 
